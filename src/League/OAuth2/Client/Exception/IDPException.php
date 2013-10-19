@@ -8,6 +8,16 @@ class IDPException extends \Exception
 
     public function __construct($result)
     {
+        // Detect JSON string.
+        if (is_string($result)) {
+          $decodedResult = json_decode($result, true);
+          if (json_last_error() == JSON_ERROR_NONE) {
+            $result = $decodedResult;
+          } else {
+            $result = array('error' => $result);
+          }
+        }
+
         $this->result = $result;
 
         $code = isset($result['code']) ? $result['code'] : 0;
@@ -15,7 +25,7 @@ class IDPException extends \Exception
         if (isset($result['error'])) {
 
             // OAuth 2.0 Draft 10 style
-            $message = $result['error'];
+            $message = isset($result['error']['message']) ? $result['error']['message'] : $result['error'];
 
         } elseif (isset($result['message'])) {
 
@@ -28,7 +38,11 @@ class IDPException extends \Exception
 
         }
 
-        parent::__construct($message['message'], $message['code']);
+        if (!is_string($message)) {
+          $messge = json_encode($message);
+        }
+
+        parent::__construct($message, $code);
     }
 
     public function getType()
