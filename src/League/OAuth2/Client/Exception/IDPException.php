@@ -39,7 +39,7 @@ class IDPException extends \Exception
         }
 
         if (!is_string($message)) {
-          $messge = json_encode($message);
+          $message = json_encode($message);
         }
 
         parent::__construct($message, $code);
